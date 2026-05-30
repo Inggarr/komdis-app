@@ -1,7 +1,7 @@
 <?php
 
 // Baca dari environment variable (production/Docker)
-// Jika tidak ada, fallback ke nilai lokal (development)
+// Jika tidak ada, fallback ke nilai lokal (development)g
 $host = getenv('DB_HOST') ?: 'localhost';
 $user = getenv('DB_USER') ?: 'userkomdis';
 $pass = getenv('DB_PASS') ?: '12345';
