@@ -44,16 +44,27 @@ jobs:
             # Buat docker network jika belum ada
             docker network create komdis-network || true
 
+            # Mengatur defaults jika GitHub Secrets kosong
+            DB_ROOT_PASS_VAL="${{ secrets.DB_ROOT_PASS }}"
+            DB_NAME_VAL="${{ secrets.DB_NAME }}"
+            DB_USER_VAL="${{ secrets.DB_USER }}"
+            DB_PASS_VAL="${{ secrets.DB_PASS }}"
+
+            [ -z "$DB_ROOT_PASS_VAL" ] && DB_ROOT_PASS_VAL="rootpass123"
+            [ -z "$DB_NAME_VAL" ] && DB_NAME_VAL="dbkomdis"
+            [ -z "$DB_USER_VAL" ] && DB_USER_VAL="userkomdis"
+            [ -z "$DB_PASS_VAL" ] && DB_PASS_VAL="12345"
+
             # Selalu stop dan jalankan ulang container DB agar terjamin berada di network yang sama
             # Menggunakan volume komdis-db-data agar data MySQL aman tidak terhapus
             docker rm -f komdis-db || true
             docker run -d \
               --name komdis-db \
               --network komdis-network \
-              -e MYSQL_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASS }} \
-              -e MYSQL_DATABASE=${{ secrets.DB_NAME }} \
-              -e MYSQL_USER=${{ secrets.DB_USER }} \
-              -e MYSQL_PASSWORD=${{ secrets.DB_PASS }} \
+              -e MYSQL_ROOT_PASSWORD="$DB_ROOT_PASS_VAL" \
+              -e MYSQL_DATABASE="$DB_NAME_VAL" \
+              -e MYSQL_USER="$DB_USER_VAL" \
+              -e MYSQL_PASSWORD="$DB_PASS_VAL" \
               -v komdis-db-data:/var/lib/mysql \
               mariadb:10.11
 
@@ -68,7 +79,7 @@ jobs:
               --network komdis-network \
               -p 8080:80 \
               -e DB_HOST=komdis-db \
-              -e DB_USER=${{ secrets.DB_USER }} \
-              -e DB_PASS=${{ secrets.DB_PASS }} \
-              -e DB_NAME=${{ secrets.DB_NAME }} \
+              -e DB_USER="$DB_USER_VAL" \
+              -e DB_PASS="$DB_PASS_VAL" \
+              -e DB_NAME="$DB_NAME_VAL" \
               ${{ secrets.DOCKERHUB_USERNAME }}/komdis-app-dinamis:latest
