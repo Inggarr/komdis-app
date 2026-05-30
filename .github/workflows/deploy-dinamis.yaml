@@ -83,3 +83,11 @@ jobs:
               -e DB_PASS="$DB_PASS_VAL" \
               -e DB_NAME="$DB_NAME_VAL" \
               ${{ secrets.DOCKERHUB_USERNAME }}/komdis-app-dinamis:latest
+
+            echo "Menunggu aplikasi siap..."
+            sleep 5
+
+            # Salin file SQL skema dari container PHP ke host, lalu import ke container MariaDB
+            echo "Meng-import skema database..."
+            docker cp komdis-app-dinamis:/var/www/html/db_tambahan.sql /tmp/db_tambahan.sql || true
+            docker exec -i komdis-db mysql -u "$DB_USER_VAL" -p"$DB_PASS_VAL" "$DB_NAME_VAL" < /tmp/db_tambahan.sql || echo "Gagal import database"
