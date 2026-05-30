@@ -40,13 +40,33 @@ jobs:
           key: ${{ secrets.AWS_PRIVATE_KEY }}
           port: 22
           script: |
+            # Buat docker network jika belum ada
+            docker network create komdis-network || true
+
+            # Jalankan MariaDB container jika belum berjalan
+            if ! docker ps --format '{{.Names}}' | grep -q '^komdis-db$'; then
+              docker rm -f komdis-db || true
+              docker run -d \
+                --name komdis-db \
+                --network komdis-network \
+                -e MYSQL_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASS }} \
+                -e MYSQL_DATABASE=${{ secrets.DB_NAME }} \
+                -e MYSQL_USER=${{ secrets.DB_USER }} \
+                -e MYSQL_PASSWORD=${{ secrets.DB_PASS }} \
+                -v komdis-db-data:/var/lib/mysql \
+                mariadb:10.11
+              echo "Menunggu MariaDB siap..."
+              sleep 20
+            fi
+
+            # Deploy PHP app
             docker rm -f komdis-app-dinamis || true
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/komdis-app-dinamis:latest
             docker run -d \
               --name komdis-app-dinamis \
+              --network komdis-network \
               -p 8080:80 \
-              --add-host=host.docker.internal:host-gateway \
-              -e DB_HOST=host.docker.internal \
+              -e DB_HOST=komdis-db \
               -e DB_USER=${{ secrets.DB_USER }} \
               -e DB_PASS=${{ secrets.DB_PASS }} \
               -e DB_NAME=${{ secrets.DB_NAME }} \
