@@ -2,7 +2,7 @@
 
 // Baca dari environment variable (production/Docker)
 // Jika tidak ada, fallback ke nilai lokal (development)
-$host = getenv('DB_HOST') ?: 'dbkomdis';
+$host = getenv('DB_HOST') ?: 'localhost';
 $user = getenv('DB_USER') ?: 'userkomdis';
 $pass = getenv('DB_PASS') ?: '12345';
 $db = getenv('DB_NAME') ?: 'dbkomdis';
