@@ -27,6 +27,7 @@ SET time_zone = "+00:00";
 -- Table structure for table `aturan`
 --
 
+DROP TABLE IF EXISTS `aturan`;
 CREATE TABLE `aturan` (
   `id` int NOT NULL,
   `judul` varchar(255) NOT NULL,
@@ -52,6 +53,7 @@ INSERT INTO `aturan` (`id`, `judul`, `kategori`, `isi`, `created_at`) VALUES
 -- Table structure for table `berita`
 --
 
+DROP TABLE IF EXISTS `berita`;
 CREATE TABLE `berita` (
   `id` int NOT NULL,
   `judul` varchar(255) NOT NULL,
@@ -77,6 +79,7 @@ INSERT INTO `berita` (`id`, `judul`, `isi`, `thumbnail`, `created_at`) VALUES
 -- Table structure for table `bukti`
 --
 
+DROP TABLE IF EXISTS `bukti`;
 CREATE TABLE `bukti` (
   `id` int NOT NULL,
   `laporan_id` int NOT NULL,
@@ -97,6 +100,7 @@ INSERT INTO `bukti` (`id`, `laporan_id`, `nama_file`, `uploaded_at`) VALUES
 -- Table structure for table `faq`
 --
 
+DROP TABLE IF EXISTS `faq`;
 CREATE TABLE `faq` (
   `id` int NOT NULL,
   `pertanyaan` varchar(255) NOT NULL,
@@ -119,6 +123,7 @@ INSERT INTO `faq` (`id`, `pertanyaan`, `jawaban`, `created_at`) VALUES
 -- Table structure for table `kategori_aturan`
 --
 
+DROP TABLE IF EXISTS `kategori_aturan`;
 CREATE TABLE `kategori_aturan` (
   `id` int NOT NULL,
   `nama_kategori` varchar(100) NOT NULL,
@@ -142,6 +147,7 @@ INSERT INTO `kategori_aturan` (`id`, `nama_kategori`, `deskripsi`, `created_at`)
 -- Table structure for table `laporan`
 --
 
+DROP TABLE IF EXISTS `laporan`;
 CREATE TABLE `laporan` (
   `id` int NOT NULL,
   `user_id` int DEFAULT NULL,
@@ -167,6 +173,7 @@ INSERT INTO `laporan` (`id`, `user_id`, `judul`, `kategori`, `kronologi`, `lokas
 -- Table structure for table `notifikasi`
 --
 
+DROP TABLE IF EXISTS `notifikasi`;
 CREATE TABLE `notifikasi` (
   `id` int NOT NULL,
   `user_id` int DEFAULT NULL,
@@ -194,6 +201,7 @@ INSERT INTO `notifikasi` (`id`, `user_id`, `pesan`, `status`, `created_at`) VALU
 -- Table structure for table `pengumuman`
 --
 
+DROP TABLE IF EXISTS `pengumuman`;
 CREATE TABLE `pengumuman` (
   `id` int NOT NULL,
   `judul` varchar(255) NOT NULL,
@@ -215,6 +223,7 @@ INSERT INTO `pengumuman` (`id`, `judul`, `isi`, `pin`, `created_at`) VALUES
 -- Table structure for table `tanggapan`
 --
 
+DROP TABLE IF EXISTS `tanggapan`;
 CREATE TABLE `tanggapan` (
   `id` int NOT NULL,
   `laporan_id` int DEFAULT NULL,
@@ -236,6 +245,7 @@ INSERT INTO `tanggapan` (`id`, `laporan_id`, `admin_id`, `isi`, `created_at`) VA
 -- Table structure for table `users`
 --
 
+DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `id` int NOT NULL,
   `nama` varchar(100) DEFAULT NULL,
