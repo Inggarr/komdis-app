@@ -83,6 +83,7 @@ jobs:
               -e DB_USER="$DB_USER_VAL" \
               -e DB_PASS="$DB_PASS_VAL" \
               -e DB_NAME="$DB_NAME_VAL" \
+              -v komdis-uploads:/var/www/html/assets/upload \
               ${{ secrets.DOCKERHUB_USERNAME }}/komdis-app-dinamis:latest
 
             echo "Menunggu aplikasi siap..."
@@ -92,3 +93,6 @@ jobs:
             echo "Meng-import skema database..."
             docker cp komdis-app-dinamis:/var/www/html/db_tambahan.sql /tmp/db_tambahan.sql || true
             docker exec -i komdis-db mysql -u "$DB_USER_VAL" -p"$DB_PASS_VAL" "$DB_NAME_VAL" < /tmp/db_tambahan.sql || echo "Gagal import database"
+
+            # Inisialisasi folder upload di volume (buat subfolder jika belum ada)
+            docker exec komdis-app-dinamis bash -c "mkdir -p /var/www/html/assets/upload/berita /var/www/html/assets/upload/profil /var/www/html/assets/upload/bukti && chmod -R 777 /var/www/html/assets/upload && chown -R www-data:www-data /var/www/html/assets/upload"
