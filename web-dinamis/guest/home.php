@@ -8,7 +8,7 @@ include '../config/koneksi.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KOMDIS HIMA — Muhammad Inggar</title>
+    <title>KOMDIS HIMA — subon</title>
     <meta name="description"
         content="Portal resmi Komisi Disiplin HIMA. Informasi aturan, berita, dan pengaduan disiplin mahasiswa.">
     <link href="../assets/css/bootstrap.min.css" rel="stylesheet">
@@ -669,7 +669,8 @@ include '../config/koneksi.php';
                 <p style="font-size:.85rem;color:#888; margin:0;">© <?= date('Y') ?> Komdis HIMA. Minimalist Design
                     Concept.</p>
                 <div class="text-center">
-                    <p style="font-size:.9rem; font-weight:700; color:#0f172a; margin:0 0 2px 0;">Muhammad Inggar Agus Sholihin</p>
+                    <p style="font-size:.9rem; font-weight:700; color:#0f172a; margin:0 0 2px 0;">Muhammad Inggar Agus
+                        Sholihin</p>
                     <p style="font-size:.8rem; color:#888; margin:0; letter-spacing:.5px;">NIM: 2388010052</p>
                 </div>
                 <div class="d-flex gap-4">

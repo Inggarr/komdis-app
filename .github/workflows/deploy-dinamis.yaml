@@ -38,7 +38,21 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-      - name: Deploy to EC2
+      - name: Checkout code (for docker-compose.yml)
+        uses: actions/checkout@v4
+
+      - name: Copy docker-compose to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USERNAME }}
+          key: ${{ secrets.AWS_PRIVATE_KEY }}
+          port: 22
+          source: "web-dinamis/docker-compose.yml"
+          target: "/home/${{ secrets.AWS_USERNAME }}/komdis-dinamis/"
+          strip_components: 1
+
+      - name: Deploy with Docker Compose on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.AWS_HOST }}
@@ -46,57 +60,41 @@ jobs:
           key: ${{ secrets.AWS_PRIVATE_KEY }}
           port: 22
           script: |
-            # Buat docker network jika belum ada
-            docker network create komdis-network || true
+            cd /home/${{ secrets.AWS_USERNAME }}/komdis-dinamis
 
-            # Mengatur defaults jika GitHub Secrets kosong
-            DB_ROOT_PASS_VAL="${{ secrets.DB_ROOT_PASS }}"
-            DB_NAME_VAL="${{ secrets.DB_NAME }}"
-            DB_USER_VAL="${{ secrets.DB_USER }}"
-            DB_PASS_VAL="${{ secrets.DB_PASS }}"
+            # Buat file .env dari secrets
+            cat > .env << EOF
+            DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+            DB_ROOT_PASS=${{ secrets.DB_ROOT_PASS }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASS=${{ secrets.DB_PASS }}
+            EOF
 
-            [ -z "$DB_ROOT_PASS_VAL" ] && DB_ROOT_PASS_VAL="rootpass123"
-            [ -z "$DB_NAME_VAL" ] && DB_NAME_VAL="dbkomdis"
-            [ -z "$DB_USER_VAL" ] && DB_USER_VAL="userkomdis"
-            [ -z "$DB_PASS_VAL" ] && DB_PASS_VAL="12345"
+            # Pull image terbaru & deploy ulang dengan docker compose
+            docker compose pull app
+            docker compose up -d --remove-orphans
 
-            # Selalu stop dan jalankan ulang container DB agar terjamin berada di network yang sama
-            # Menggunakan volume komdis-db-data agar data MySQL aman tidak terhapus
-            docker rm -f komdis-db || true
-            docker run -d \
-              --name komdis-db \
-              --network komdis-network \
-              -e MYSQL_ROOT_PASSWORD="$DB_ROOT_PASS_VAL" \
-              -e MYSQL_DATABASE="$DB_NAME_VAL" \
-              -e MYSQL_USER="$DB_USER_VAL" \
-              -e MYSQL_PASSWORD="$DB_PASS_VAL" \
-              -v komdis-db-data:/var/lib/mysql \
-              mariadb:10.11
+            # Tunggu db sehat (healthcheck sudah handle ini, tapi kita verifikasi)
+            echo "Menunggu DB siap..."
+            sleep 10
 
-            echo "Menunggu MariaDB siap..."
-            sleep 15
+            # Import skema database
+            echo "Import skema database..."
+            docker compose cp app:/var/www/html/db_tambahan.sql /tmp/db_tambahan.sql || true
+            docker compose exec -T db mysql \
+              -u"${{ secrets.DB_USER }}" \
+              -p"${{ secrets.DB_PASS }}" \
+              "${{ secrets.DB_NAME }}" \
+              < /tmp/db_tambahan.sql || echo "Skema sudah ada / gagal import"
 
-            # Deploy PHP app
-            docker rm -f komdis-app-dinamis || true
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/komdis-app-dinamis:latest
-            docker run -d \
-              --name komdis-app-dinamis \
-              --network komdis-network \
-              -p 8080:80 \
-              -e DB_HOST=komdis-db \
-              -e DB_USER="$DB_USER_VAL" \
-              -e DB_PASS="$DB_PASS_VAL" \
-              -e DB_NAME="$DB_NAME_VAL" \
-              -v komdis-uploads:/var/www/html/assets/upload \
-              ${{ secrets.DOCKERHUB_USERNAME }}/komdis-app-dinamis:latest
+            # Pastikan folder upload ada dan punya permission benar
+            docker compose exec app bash -c \
+              "mkdir -p /var/www/html/assets/upload/berita \
+               /var/www/html/assets/upload/profil \
+               /var/www/html/assets/upload/bukti \
+               && chmod -R 777 /var/www/html/assets/upload \
+               && chown -R www-data:www-data /var/www/html/assets/upload"
 
-            echo "Menunggu aplikasi siap..."
-            sleep 5
-
-            # Salin file SQL skema dari container PHP ke host, lalu import ke container MariaDB
-            echo "Meng-import skema database..."
-            docker cp komdis-app-dinamis:/var/www/html/db_tambahan.sql /tmp/db_tambahan.sql || true
-            docker exec -i komdis-db mysql -u "$DB_USER_VAL" -p"$DB_PASS_VAL" "$DB_NAME_VAL" < /tmp/db_tambahan.sql || echo "Gagal import database"
-
-            # Inisialisasi folder upload di volume (buat subfolder jika belum ada)
-            docker exec komdis-app-dinamis bash -c "mkdir -p /var/www/html/assets/upload/berita /var/www/html/assets/upload/profil /var/www/html/assets/upload/bukti && chmod -R 777 /var/www/html/assets/upload && chown -R www-data:www-data /var/www/html/assets/upload"
+            echo "Deploy selesai!"
+            docker compose ps

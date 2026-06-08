@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  app:
+    image: ${DOCKERHUB_USERNAME}/komdis-app:latest
+    container_name: komdis-app
+    restart: unless-stopped
+    ports:
+      - "80:80"
+
+networks:
+  default:
+    driver: bridge

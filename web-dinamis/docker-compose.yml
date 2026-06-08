@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:10.11
+    container_name: komdis-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS:-rootpass123}
+      MYSQL_DATABASE: ${DB_NAME:-dbkomdis}
+      MYSQL_USER: ${DB_USER:-userkomdis}
+      MYSQL_PASSWORD: ${DB_PASS:-12345}
+    volumes:
+      - komdis-db-data:/var/lib/mysql
+    networks:
+      - komdis-network
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  app:
+    image: ${DOCKERHUB_USERNAME}/komdis-app-dinamis:latest
+    container_name: komdis-app-dinamis
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      DB_HOST: db
+      DB_USER: ${DB_USER:-userkomdis}
+      DB_PASS: ${DB_PASS:-12345}
+      DB_NAME: ${DB_NAME:-dbkomdis}
+    volumes:
+      - komdis-uploads:/var/www/html/assets/upload
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - komdis-network
+
+volumes:
+  komdis-db-data:
+  komdis-uploads:
+
+networks:
+  komdis-network:
+    driver: bridge
