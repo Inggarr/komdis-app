@@ -38,20 +38,6 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-      - name: Checkout code (for docker-compose.yml)
-        uses: actions/checkout@v4
-
-      - name: Copy docker-compose to EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.AWS_HOST }}
-          username: ${{ secrets.AWS_USERNAME }}
-          key: ${{ secrets.AWS_PRIVATE_KEY }}
-          port: 22
-          source: "web-dinamis/docker-compose.yml"
-          target: "/home/${{ secrets.AWS_USERNAME }}/komdis-dinamis/"
-          strip_components: 1
-
       - name: Deploy with Docker Compose on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -60,41 +46,120 @@ jobs:
           key: ${{ secrets.AWS_PRIVATE_KEY }}
           port: 22
           script: |
-            cd /home/${{ secrets.AWS_USERNAME }}/komdis-dinamis
+            # Buat direktori kerja
+            mkdir -p /home/$USER/komdis-dinamis
+            cd /home/$USER/komdis-dinamis
 
-            # Buat file .env dari secrets
-            cat > .env << EOF
-            DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
-            DB_ROOT_PASS=${{ secrets.DB_ROOT_PASS }}
-            DB_NAME=${{ secrets.DB_NAME }}
-            DB_USER=${{ secrets.DB_USER }}
-            DB_PASS=${{ secrets.DB_PASS }}
-            EOF
+            # Set variabel dari secrets (fallback ke default jika kosong)
+            DOCKER_USER="${{ secrets.DOCKERHUB_USERNAME }}"
+            DB_ROOT="${{ secrets.DB_ROOT_PASS }}"
+            DB_NAME="${{ secrets.DB_NAME }}"
+            DB_USER="${{ secrets.DB_USER }}"
+            DB_PASS="${{ secrets.DB_PASS }}"
 
-            # Pull image terbaru & deploy ulang dengan docker compose
-            docker compose pull app
-            docker compose up -d --remove-orphans
+            [ -z "$DB_ROOT" ] && DB_ROOT="rootpass123"
+            [ -z "$DB_NAME" ] && DB_NAME="dbkomdis"
+            [ -z "$DB_USER" ] && DB_USER="userkomdis"
+            [ -z "$DB_PASS" ] && DB_PASS="12345"
 
-            # Tunggu db sehat (healthcheck sudah handle ini, tapi kita verifikasi)
+            # Tulis .env
+            cat > .env << ENVEOF
+            DOCKERHUB_USERNAME=${DOCKER_USER}
+            DB_ROOT_PASS=${DB_ROOT}
+            DB_NAME=${DB_NAME}
+            DB_USER=${DB_USER}
+            DB_PASS=${DB_PASS}
+            ENVEOF
+
+            # Tulis docker-compose.yml langsung di server
+            cat > docker-compose.yml << 'COMPOSEEOF'
+            version: '3.8'
+
+            services:
+              db:
+                image: mariadb:10.11
+                container_name: komdis-db
+                restart: unless-stopped
+                environment:
+                  MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS:-rootpass123}
+                  MYSQL_DATABASE: ${DB_NAME:-dbkomdis}
+                  MYSQL_USER: ${DB_USER:-userkomdis}
+                  MYSQL_PASSWORD: ${DB_PASS:-12345}
+                volumes:
+                  - komdis-db-data:/var/lib/mysql
+                networks:
+                  - komdis-network
+                healthcheck:
+                  test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+                  interval: 10s
+                  timeout: 5s
+                  retries: 5
+                  start_period: 30s
+
+              app:
+                image: ${DOCKERHUB_USERNAME}/komdis-app-dinamis:latest
+                container_name: komdis-app-dinamis
+                restart: unless-stopped
+                ports:
+                  - "8080:80"
+                environment:
+                  DB_HOST: db
+                  DB_USER: ${DB_USER:-userkomdis}
+                  DB_PASS: ${DB_PASS:-12345}
+                  DB_NAME: ${DB_NAME:-dbkomdis}
+                volumes:
+                  - komdis-uploads:/var/www/html/assets/upload
+                depends_on:
+                  db:
+                    condition: service_healthy
+                networks:
+                  - komdis-network
+
+            volumes:
+              komdis-db-data:
+              komdis-uploads:
+
+            networks:
+              komdis-network:
+                driver: bridge
+            COMPOSEEOF
+
+            # Deteksi docker compose v2 atau v1
+            if docker compose version > /dev/null 2>&1; then
+              COMPOSE_CMD="docker compose"
+            else
+              COMPOSE_CMD="docker-compose"
+            fi
+
+            echo "Menggunakan: $COMPOSE_CMD"
+
+            # Login Docker Hub di server
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "$DOCKER_USER" --password-stdin
+
+            # Pull image terbaru & deploy
+            $COMPOSE_CMD pull app
+            $COMPOSE_CMD up -d --remove-orphans
+
+            # Tunggu DB sehat
             echo "Menunggu DB siap..."
-            sleep 10
+            sleep 15
 
             # Import skema database
             echo "Import skema database..."
-            docker compose cp app:/var/www/html/db_tambahan.sql /tmp/db_tambahan.sql || true
-            docker compose exec -T db mysql \
-              -u"${{ secrets.DB_USER }}" \
-              -p"${{ secrets.DB_PASS }}" \
-              "${{ secrets.DB_NAME }}" \
-              < /tmp/db_tambahan.sql || echo "Skema sudah ada / gagal import"
+            $COMPOSE_CMD cp app:/var/www/html/db_tambahan.sql /tmp/db_tambahan.sql 2>/dev/null || true
+            $COMPOSE_CMD exec -T db mysql \
+              -u"${DB_USER}" \
+              -p"${DB_PASS}" \
+              "${DB_NAME}" \
+              < /tmp/db_tambahan.sql 2>/dev/null || echo "Skema sudah ada atau tidak perlu diimport"
 
-            # Pastikan folder upload ada dan punya permission benar
-            docker compose exec app bash -c \
+            # Pastikan folder upload ada
+            $COMPOSE_CMD exec -T app bash -c \
               "mkdir -p /var/www/html/assets/upload/berita \
                /var/www/html/assets/upload/profil \
                /var/www/html/assets/upload/bukti \
                && chmod -R 777 /var/www/html/assets/upload \
-               && chown -R www-data:www-data /var/www/html/assets/upload"
+               && chown -R www-data:www-data /var/www/html/assets/upload" || true
 
-            echo "Deploy selesai!"
-            docker compose ps
+            echo "=== Deploy selesai! ==="
+            $COMPOSE_CMD ps

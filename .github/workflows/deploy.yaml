@@ -38,20 +38,6 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-      - name: Checkout code (for docker-compose.yml)
-        uses: actions/checkout@v4
-
-      - name: Copy docker-compose to EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.AWS_HOST }}
-          username: ${{ secrets.AWS_USERNAME }}
-          key: ${{ secrets.AWS_PRIVATE_KEY }}
-          port: 22
-          source: "web-statis/docker-compose.yml"
-          target: "/home/${{ secrets.AWS_USERNAME }}/komdis-statis/"
-          strip_components: 1
-
       - name: Deploy with Docker Compose on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -60,16 +46,49 @@ jobs:
           key: ${{ secrets.AWS_PRIVATE_KEY }}
           port: 22
           script: |
-            cd /home/${{ secrets.AWS_USERNAME }}/komdis-statis
+            # Buat direktori kerja
+            mkdir -p /home/$USER/komdis-statis
+            cd /home/$USER/komdis-statis
 
-            # Buat file .env dari secrets
-            cat > .env << EOF
-            DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
-            EOF
+            DOCKER_USER="${{ secrets.DOCKERHUB_USERNAME }}"
 
-            # Pull image terbaru & deploy ulang
-            docker compose pull app
-            docker compose up -d --remove-orphans
+            # Tulis .env
+            cat > .env << ENVEOF
+            DOCKERHUB_USERNAME=${DOCKER_USER}
+            ENVEOF
 
-            echo "Deploy web statis selesai!"
-            docker compose ps
+            # Tulis docker-compose.yml langsung di server
+            cat > docker-compose.yml << 'COMPOSEEOF'
+            version: '3.8'
+
+            services:
+              app:
+                image: ${DOCKERHUB_USERNAME}/komdis-app:latest
+                container_name: komdis-app
+                restart: unless-stopped
+                ports:
+                  - "80:80"
+
+            networks:
+              default:
+                driver: bridge
+            COMPOSEEOF
+
+            # Deteksi docker compose v2 atau v1
+            if docker compose version > /dev/null 2>&1; then
+              COMPOSE_CMD="docker compose"
+            else
+              COMPOSE_CMD="docker-compose"
+            fi
+
+            echo "Menggunakan: $COMPOSE_CMD"
+
+            # Login Docker Hub di server
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "$DOCKER_USER" --password-stdin
+
+            # Pull image terbaru & deploy
+            $COMPOSE_CMD pull app
+            $COMPOSE_CMD up -d --remove-orphans
+
+            echo "=== Deploy web statis selesai! ==="
+            $COMPOSE_CMD ps
