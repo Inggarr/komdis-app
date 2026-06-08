@@ -78,7 +78,7 @@ jobs:
             docker run -d \
               --name komdis-app-dinamis \
               --network komdis-network \
-              -p 8080:80 \
+              -p 3000:80 \
               -e DB_HOST=komdis-db \
               -e DB_USER="$DB_USER_VAL" \
               -e DB_PASS="$DB_PASS_VAL" \
