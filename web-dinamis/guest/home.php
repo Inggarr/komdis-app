@@ -668,6 +668,10 @@ include '../config/koneksi.php';
             <div class="pt-5 border-top d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <p style="font-size:.85rem;color:#888; margin:0;">© <?= date('Y') ?> Komdis HIMA. Minimalist Design
                     Concept.</p>
+                <div class="text-center">
+                    <p style="font-size:.9rem; font-weight:700; color:#0f172a; margin:0 0 2px 0;">Muhammad Inggar Agus Sholihin</p>
+                    <p style="font-size:.8rem; color:#888; margin:0; letter-spacing:.5px;">NIM: 2388010052</p>
+                </div>
                 <div class="d-flex gap-4">
                     <a href="#" class="text-dark text-decoration-none small fw-bold">Instagram</a>
                     <a href="#" class="text-dark text-decoration-none small fw-bold">Twitter</a>
