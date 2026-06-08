@@ -433,7 +433,7 @@ include '../config/koneksi.php';
                         Pengaduan Terpadu
                     </div>
                     <h1 class="hero-title">
-                        Jaga Integritas<span>Bersama Komdis.</span>
+                        Jaga Integritas<span>Bersama Inggar.</span>
                     </h1>
                     <p class="hero-desc">
                         Portal resmi Komisi Disiplin HIMA. Sistem informasi dan pengaduan terintegrasi untuk menjaga
