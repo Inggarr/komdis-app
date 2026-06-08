@@ -1,6 +1,6 @@
-<?php 
+<?php
 session_start();
-include '../config/koneksi.php'; 
+include '../config/koneksi.php';
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -8,7 +8,7 @@ include '../config/koneksi.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KOMDIS HIMA — Komisi Disiplin</title>
+    <title>KOMDIS HIMA — Muhammad Inggar</title>
     <meta name="description"
         content="Portal resmi Komisi Disiplin HIMA. Informasi aturan, berita, dan pengaduan disiplin mahasiswa.">
     <link href="../assets/css/bootstrap.min.css" rel="stylesheet">
@@ -88,7 +88,7 @@ include '../config/koneksi.php';
             align-items: center;
             gap: 10px;
             transition: all .3s ease;
-            box-shadow: 0 10px 20px rgba(15,23,42,0.15);
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
         }
 
         .btn-hero-primary:hover {
@@ -320,9 +320,19 @@ include '../config/koneksi.php';
             color: #fff;
         }
 
-        .cta-section .hero-title { color: #fff; }
-        .cta-section .hero-desc { color: rgba(255,255,255,0.7); }
-        .cta-section .hero-badge { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: #fff; }
+        .cta-section .hero-title {
+            color: #fff;
+        }
+
+        .cta-section .hero-desc {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .cta-section .hero-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
 
         .btn-cta-light {
             background: #fff;
@@ -337,13 +347,13 @@ include '../config/koneksi.php';
         .btn-cta-light:hover {
             background: #f8fafc;
             transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
 
         .btn-cta-outline {
             background: transparent;
             color: #fff;
-            border: 2px solid rgba(255,255,255,0.3);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             padding: 14px 36px;
             border-radius: 50px;
             font-weight: 700;
@@ -353,7 +363,7 @@ include '../config/koneksi.php';
 
         .btn-cta-outline:hover {
             border-color: #fff;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
         }
 
         /* ── FOOTER ── */
@@ -405,7 +415,7 @@ include '../config/koneksi.php';
 </head>
 
 <body>
-    <?php 
+    <?php
     if (isset($_SESSION['login']) && $_SESSION['role'] == 'user') {
         include '../partials/user_navbar.php';
     } else {
@@ -419,7 +429,8 @@ include '../config/koneksi.php';
             <div class="row align-items-center g-5">
                 <div class="col-lg-7">
                     <div class="hero-badge">
-                        <i data-lucide="shield-check" style="width: 16px; height: 16px; color: #0f172a;"></i> Sistem Pengaduan Terpadu
+                        <i data-lucide="shield-check" style="width: 16px; height: 16px; color: #0f172a;"></i> Sistem
+                        Pengaduan Terpadu
                     </div>
                     <h1 class="hero-title">
                         Jaga Integritas<span>Bersama Komdis.</span>
@@ -515,7 +526,8 @@ include '../config/koneksi.php';
                         <div class="feature-icon"><i data-lucide="file-text"></i></div>
                         <h5>Tata Tertib</h5>
                         <p>Pahami landasan aturan organisasi yang berlaku.</p>
-                        <a href="aturan.php" class="btn-feature-link">Explore More <i data-lucide="arrow-right" style="width: 16px;"></i></a>
+                        <a href="aturan.php" class="btn-feature-link">Explore More <i data-lucide="arrow-right"
+                                style="width: 16px;"></i></a>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
@@ -523,7 +535,8 @@ include '../config/koneksi.php';
                         <div class="feature-icon"><i data-lucide="newspaper"></i></div>
                         <h5>Informasi</h5>
                         <p>Update kegiatan dan pengumuman resmi Komdis.</p>
-                        <a href="berita.php" class="btn-feature-link">Explore More <i data-lucide="arrow-right" style="width: 16px;"></i></a>
+                        <a href="berita.php" class="btn-feature-link">Explore More <i data-lucide="arrow-right"
+                                style="width: 16px;"></i></a>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
@@ -531,7 +544,8 @@ include '../config/koneksi.php';
                         <div class="feature-icon"><i data-lucide="help-circle"></i></div>
                         <h5>FAQ</h5>
                         <p>Temukan jawaban cepat atas kendala umum.</p>
-                        <a href="faq.php" class="btn-feature-link">Explore More <i data-lucide="arrow-right" style="width: 16px;"></i></a>
+                        <a href="faq.php" class="btn-feature-link">Explore More <i data-lucide="arrow-right"
+                                style="width: 16px;"></i></a>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
@@ -539,7 +553,8 @@ include '../config/koneksi.php';
                         <div class="feature-icon"><i data-lucide="send"></i></div>
                         <h5>Laporan</h5>
                         <p>Sistem pengaduan terenkripsi dan aman.</p>
-                        <a href="../auth/login.php" class="btn-feature-link">Login First <i data-lucide="arrow-right" style="width: 16px;"></i></a>
+                        <a href="../auth/login.php" class="btn-feature-link">Login First <i data-lucide="arrow-right"
+                                style="width: 16px;"></i></a>
                     </div>
                 </div>
             </div>
@@ -574,14 +589,17 @@ include '../config/koneksi.php';
                                             alt="<?= htmlspecialchars($b['judul']) ?>">
                                     </div>
                                 <?php else: ?>
-                                    <div class="news-no-img"><i data-lucide="newspaper" class="text-muted" style="width: 48px; height: 48px;"></i></div>
+                                    <div class="news-no-img"><i data-lucide="newspaper" class="text-muted"
+                                            style="width: 48px; height: 48px;"></i></div>
                                 <?php endif; ?>
                                 <div class="card-body">
-                                    <span class="section-label mb-2 d-block" style="font-size: 0.65rem; color: #0f172a;">Updates</span>
+                                    <span class="section-label mb-2 d-block"
+                                        style="font-size: 0.65rem; color: #0f172a;">Updates</span>
                                     <h6><?= htmlspecialchars($b['judul']) ?></h6>
                                     <p><?= htmlspecialchars(substr(strip_tags($b['isi']), 0, 80)) ?>...</p>
                                     <a href="detail_berita.php?id=<?= $b['id'] ?>"
-                                        class="fw-bold text-navy text-decoration-none small d-flex align-items-center gap-2">Baca Selengkapnya <i data-lucide="arrow-right" style="width: 14px;"></i></a>
+                                        class="fw-bold text-navy text-decoration-none small d-flex align-items-center gap-2">Baca
+                                        Selengkapnya <i data-lucide="arrow-right" style="width: 14px;"></i></a>
                                 </div>
                             </div>
                         </div>
@@ -594,7 +612,8 @@ include '../config/koneksi.php';
     <!-- ══════════════════ CTA ══════════════════ -->
     <section class="cta-section mx-md-5">
         <div class="container text-center position-relative" style="z-index: 2;">
-            <div class="hero-badge mb-4"><i data-lucide="shield" style="width: 16px; height: 16px; color: #fff;"></i> Integrity First</div>
+            <div class="hero-badge mb-4"><i data-lucide="shield" style="width: 16px; height: 16px; color: #fff;"></i>
+                Integrity First</div>
             <h2 class="hero-title mb-3">Punya Laporan<br>Pelanggaran?</h2>
             <p class="hero-desc mx-auto mb-5">
                 Kami menjamin kerahasiaan identitas pelapor. Login sekarang untuk memulai proses pengaduan yang resmi.
@@ -602,15 +621,20 @@ include '../config/koneksi.php';
             <div class="d-flex justify-content-center gap-3 flex-wrap">
                 <?php if (isset($_SESSION['login'])): ?>
                     <?php $dashboardUrl = ($_SESSION['role'] == 'admin') ? '../admin/dashboard.php' : '../user/dashboard.php'; ?>
-                    <a href="<?= $dashboardUrl ?>" class="btn-cta-light"><i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i> Ke Dashboard</a>
+                    <a href="<?= $dashboardUrl ?>" class="btn-cta-light"><i data-lucide="layout-dashboard"
+                            style="width: 18px; height: 18px;"></i> Ke Dashboard</a>
                 <?php else: ?>
-                    <a href="../auth/login.php" class="btn-cta-light"><i data-lucide="lock" style="width: 18px; height: 18px;"></i> Login Sekarang</a>
-                    <a href="kontak.php" class="btn-cta-outline"><i data-lucide="mail" style="width: 18px; height: 18px;"></i> Kontak Komdis</a>
+                    <a href="../auth/login.php" class="btn-cta-light"><i data-lucide="lock"
+                            style="width: 18px; height: 18px;"></i> Login Sekarang</a>
+                    <a href="kontak.php" class="btn-cta-outline"><i data-lucide="mail"
+                            style="width: 18px; height: 18px;"></i> Kontak Komdis</a>
                 <?php endif; ?>
             </div>
         </div>
         <!-- Decorative Background -->
-        <div class="position-absolute top-0 start-0 w-100 h-100" style="background: radial-gradient(circle at top right, rgba(255,255,255,0.05) 0%, transparent 40%); pointer-events: none;"></div>
+        <div class="position-absolute top-0 start-0 w-100 h-100"
+            style="background: radial-gradient(circle at top right, rgba(255,255,255,0.05) 0%, transparent 40%); pointer-events: none;">
+        </div>
     </section>
 
     <!-- ══════════════════ FOOTER ══════════════════ -->
